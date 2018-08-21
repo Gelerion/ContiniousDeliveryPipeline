@@ -1,0 +1,54 @@
+Note! we must be able ro run the tests separately
+
+Unit Tests
+---------------------------------
+Unit tests provide very fast feedback, that is, they run in seconds or even milliseconds. Basically, they test only an
+isolated unit of code such as a method in a class and are great for ensuring the behavior of a code isolated from its dependencies.
+
+However, there are cases where a unit test would not be appropriate. For example, an issue with a SQL query would not
+be caught from a unit test since it does not actually hit the database.
+
+In the Notepad application, the unit tests are written using JUnit and Hamcrest.
+
+
+Integration Tests
+---------------------------------
+Integration tests are more comprehensive than unit tests because they actually test an integration between the application
+and its external dependencies, such as a database or a webservice. Thus, they could be used for example to ensure that
+a SQL query is fetching the correct data, an external API is returning the correct JSON, and so on. However, integration
+tests also have their downsides, such as:
+
+Take more time to run than unit tests.
+More difficult to set up than unit tests because they expect the application’s external dependencies to be up and running
+before they are executed.
+
+
+Acceptance Tests
+---------------------------------
+We have tested the backend with unit and integration tests, so theoretically, if an HTTP POST request is sent to the
+/notes endpoint with a JSON corresponding to a note with title and content filled, the note will be successfully persisted to the database.
+
+Now we need to ensure the behavior for the frontend by simulating the actual end user interacting with the page in the web
+browser (clicking buttons and links, filling in and submitting forms, and so on). For that, we code acceptance tests using Selenium.
+
+Acceptance tests provide even slower feedback than integration tests. They are even more difficult to set up than integration
+tests because they actually require the Notepad application to be deployed to an environment whereas integration
+tests could be run just by setting up a MySQL instance on localhost.
+
+
+Smoke Tests
+---------------------------------
+Smoke tests are a simple subset of integration/acceptance tests that are executed against the production servers after a
+deployment (but before they serve traffic to end users) to ensure that the new version deployed is up and running. These
+tests are intended to make sure that the main application functionalities are still working properly.
+
+In the Notepad application, there is only a single smoke test, which is the shouldCreateNewNoteWithTitleAndContent test
+of the CreateNoteTest class, responsible for ensuring that a user can create a note with title and content.
+
+
+Performance Tests
+---------------------------------
+Almost every application has non-functional requirements regarding performance such as “even with 100 users connecting
+at the same time, the main page should take no more than 2s to load”. You can ensure that new release candidates of your
+software are still meeting the performance requirements by integrating to your continuous delivery pipeline the so called
+performance tests. A very handy tool that allow us to create performance tests is Gatling.

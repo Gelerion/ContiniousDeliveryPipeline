@@ -1,0 +1,41 @@
+//noinspection GroovyAssignabilityCheck
+task integTest(type: Test) {
+    group = LifecycleBasePlugin.VERIFICATION_GROUP
+    description = 'Runs the integration tests.'
+
+    //maxHeapSize = '1024m'
+
+    //The task requires us to define where both our classes and classpath reside, which we can find from
+    //the SourceSet we defined previously.
+    testClassesDirs = files(sourceSets.integTest.output.classesDirs)
+    classpath = sourceSets.integTest.runtimeClasspath
+
+    reports {
+        html.destination = "$buildDir/reports/integration-test"
+        junitXml.destination = "$buildDir/integration-test-results"
+    }
+
+    mustRunAfter tasks.test //execute after the unit tests
+}
+
+//Finally add our newly created integTest task to the verification task lifecycle by making the check
+//task depend upon it.
+check.dependsOn integTest
+
+//In our task’s definition we ensure that it runs after the test task that exists within the same project.
+//However, our project structure defined two sub-projects for which Gradle will create two individual test tasks.
+//For this reason we must re-evaluate all of the other projects once Gradle has finished the Configuration
+//Phase and modify our integTest task to run after any fast-failing tasks (e.g. test) that were created by other sub-projects.
+gradle.projectsEvaluated {
+    def quickTasks = []
+
+    gradle.rootProject.allprojects.each { project ->
+        quickTasks.addAll(project.tasks.findAll { it.name == 'test' })
+        quickTasks.addAll(project.tasks.withType(FindBugs))
+        quickTasks.addAll(project.tasks.withType(Pmd))
+    }
+
+    quickTasks.each { task ->
+        project.tasks.integTest.mustRunAfter task
+    }
+}

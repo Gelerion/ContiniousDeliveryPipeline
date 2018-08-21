@@ -1,0 +1,3 @@
+Jenkins plugins allows to extend the Jenkins core functionalities. You have already installed some when you set
+up the Jenkins installation. Now, we are going to create an integration between Slack and Jenkins so that our jobs
+can send notifications to a Slack Channel.

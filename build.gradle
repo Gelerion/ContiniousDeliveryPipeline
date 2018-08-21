@@ -1,0 +1,89 @@
+plugins {
+	id "org.springframework.boot" version "2.0.4.RELEASE"
+    // https://github.com/lkishalmi/gradle-gatling-plugin
+    id "com.github.lkishalmi.gatling" version "0.7.3"
+    // beautiful logs on the console while running tests
+    // https://github.com/radarsh/gradle-test-logger-plugin
+    id 'com.adarshr.test-logger' version '1.4.0'
+}
+
+apply plugin: 'java'
+apply plugin: 'scala'
+
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+
+//https://james-willett.com/2017/04/running-gatling-through-gradle/
+//Left click on build.gradle - Build Module
+apply plugin: "com.github.lkishalmi.gatling"
+apply plugin: 'com.adarshr.test-logger'
+
+group = 'com.gelerion.cd.notepad'
+version = '0.0.1-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+	mavenCentral()
+}
+
+//separating integration tests
+//https://www.michael-bull.com/blog/2016/06/04/separating-integration-and-unit-tests-with-gradle
+sourceSets {
+    //Provides, at compile-time, the classes produced by the main and test SourceSets, allowing the integration
+    //tests to access the production code in main and allowing them to reuse any unit test helper methods in test.
+    integTest {
+        compileClasspath += main.output + test.output
+        runtimeClasspath += main.output + test.output
+    }
+}
+configurations {
+    //Provides, at compile-time, the dependencies that both main and test require in order to successfully compile.
+    integTestCompile.extendsFrom compile
+    integTestRuntime.extendsFrom runtime
+    //Provides, at run-time, the dependencies that both main and test require to run.
+    integTestCompile.extendsFrom testCompile
+    integTestRuntime.extendsFrom testRuntime
+}
+
+//!! integration tests are executed only during verification phase
+apply from: "$rootDir/gradle/integTest.gradle"
+
+dependencies {
+	compile('org.springframework.boot:spring-boot-starter-actuator')
+	compile('org.springframework.boot:spring-boot-starter-data-jpa')
+	compile('org.springframework.boot:spring-boot-starter-thymeleaf')
+	compile('org.springframework.boot:spring-boot-starter-web')
+
+    //starting from Spring Boot 2 the Layout Dialect is not part of the starter and we need to add it on our own
+    compile 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
+
+    compile 'org.flywaydb:flyway-core'
+    compile 'mysql:mysql-connector-java'
+
+    compile 'org.webjars:jquery:3.1.1'
+    compile 'org.webjars:bootstrap:3.3.7'
+    compile 'org.webjars:noty:2.2.4'
+
+    compile 'org.seleniumhq.selenium:selenium-java'
+
+    gatling "org.scala-lang:scala-library:2.12.3"
+    gatling "org.scala-lang:scala-reflect:2.12.3"
+    gatling "org.scala-lang:scala-compiler:2.12.3"
+    //SpringBoot 2 is using the version 4.1.23.Final which for some reason is not executing the gatling tests.
+    gatling 'io.netty:netty-all:4.0.51.Final'
+
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+}
+
+springBoot {
+    mainClassName = 'com.gelerion.cd.notepad.notepad.NotepadApplication'
+}
+
+test {
+    testLogging.showStandardStreams = false
+}
+
+testlogger {
+//    theme 'mocha'
+}

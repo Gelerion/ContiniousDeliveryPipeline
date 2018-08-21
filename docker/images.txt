@@ -1,0 +1,5 @@
+Mysql
+    docker container run -d --name mysql -e MYSQL_DATABASE=notepad -e MYSQL_ROOT_PASSWORD=root -p 3306:3306 mysql:5.7
+Artifactory
+Jenkins
+    docker container run -d --name jenkins-master -p 8080:8080 -p 50000:50000 -v ~/jenkins_home:/var/jenkins_home jenkins/jenkins:lts
